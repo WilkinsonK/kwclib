@@ -1,0 +1,29 @@
+[project]
+name = "mylib"
+out = "target"
+version = "0.0.0"
+
+[compile]
+compiler = "gcc"
+includes = ["./include"]
+libraries = ["./target/lib"]
+standard = "c11"
+warnings = ["all", "extra", "pedantic"]
+
+[bin]
+name = "main"
+sources = ["./src/main.c"]
+libraries = ["monad"]
+
+[[lib]]
+name = "monad"
+sources = ["src/monad.c"]
+libraries = ["system"]
+kind = "shared"
+output = "libmonad.so"
+
+[[lib]]
+name = "system"
+sources = ["src/system.c"]
+kind = "shared"
+output = "libsystem.so"

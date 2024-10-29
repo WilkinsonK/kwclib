@@ -1,0 +1,18 @@
+# Exclude IDE configuration artifacts.
+.idea/
+.vscode/
+.zed/
+
+# Exclude Python artifacts.
+.mypy_cache/
+__pycache__/
+*.egg-info/
+
+# Exclude C artifacts.
+target/
+*.so
+*.a
+*.o
+
+# Exclude OS specific artifacts.
+.DS_Store
