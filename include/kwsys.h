@@ -10,6 +10,17 @@
 #include <string.h>
 
 // -------------------------------------------------------
+// General API.
+// -------------------------------------------------------
+// Macros and functions which are most common and widely
+// used throughout the KWC system.
+// -------------------------------------------------------
+/** Initializes system assets for KWC lib runtime. */
+#define Kwc_Setup() { Blocks_Setup(); }
+/** Destroys system assets for KWC lib runtime. */
+#define Kwc_Clear() { Blocks_Clear(); }
+
+// -------------------------------------------------------
 // IO Operations
 // -------------------------------------------------------
 // Macros defines here determine the procedure of how to
@@ -95,4 +106,27 @@
  * Writes a system level message to stderr.
  */
 #define SystemF(...) FSystemF(stderr, __VA_ARGS__)
+
+// -------------------------------------------------------
+// Heap Management Operations
+// -------------------------------------------------------
+// Manage heap allocations within this system. It is
+// recommended to use the macros supplied in this section
+// as opposed to the function implementations.
+// -------------------------------------------------------
+
+#define Free(PTR) Blocks_Free((void*)PTR); DebugF("Destroyed object\n")
+#define MAlloc(SIZE) Blocks_MAlloc(SIZE); DebugF("Created new object\n")
+#define Realloc(PTR, SIZE) Blocks_Realloc((void*)PTR, SIZE); DebugF("Resized object\n")
+
+/** Destroys all blocks allocated on the heap. */
+void Blocks_Clear(void);
+/** Initializes the heap block management system. */
+void Blocks_Setup(void);
+/** Free and destroy a single heap allocation. */
+void Blocks_Free(void* ptr);
+/** Initializes a block of memory on the heap. */
+void* Blocks_MAlloc(size_t size);
+/** Resizes a block of memory on the heap. */
+void* Blocks_Realloc(void* ptr, size_t size);
 #endif // Pragma
