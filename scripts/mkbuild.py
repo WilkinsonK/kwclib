@@ -59,8 +59,9 @@ def write_script(fd: io.TextIOWrapper):
         f.writeln(f"[[ ! -d {(out / 'obj')!s} ]] && mkdir -p {(out / 'obj')!s}")
         f.writeln("")
 
-        for line in map(lambda s: s[2], statements):
-            f.writeln(f"{line}")
+        for _, file, command in statements:
+            f.writeln(f"echo '\\033[34mbuilding\\033[0m {file}'")
+            f.writeln(f"{command}")
 
     fd.write(os.linesep)
     with write_function(fd, "clean") as f:
@@ -68,6 +69,7 @@ def write_script(fd: io.TextIOWrapper):
 
     fd.write(os.linesep)
     with write_function(fd, "rebuild") as f:
+        f.writeln(f"echo '\\033[34mrebuilding\\033[0m build.sh'")
         f.writeln(f"$(which python3) scripts/mkbuild.py")
 
     fd.write(os.linesep)

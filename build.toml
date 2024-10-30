@@ -5,6 +5,7 @@ version = "0.0.0"
 
 [compile]
 compiler = "gcc"
+debug_level = 0
 includes = ["./include"]
 libraries = ["./target/lib"]
 standard = "c11"
@@ -13,17 +14,10 @@ warnings = ["all", "extra", "pedantic"]
 [bin]
 name = "main"
 sources = ["./src/main.c"]
-libraries = ["monad"]
+libraries = ["kwsys"]
 
 [[lib]]
-name = "monad"
-sources = ["src/monad.c"]
-libraries = ["system"]
+name = "kwsys"
+sources = ["src/kwsys.c"]
 kind = "shared"
-output = "libmonad.so"
-
-[[lib]]
-name = "system"
-sources = ["src/system.c"]
-kind = "shared"
-output = "libsystem.so"
+output = "libkwsys.so"

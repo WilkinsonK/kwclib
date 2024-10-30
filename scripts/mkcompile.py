@@ -66,6 +66,8 @@ def generate_flags(conf: Config, context: Context) -> list[str]:
     flags = []
     flags.append(conf.compile.compiler)
 
+    flags.append(f"-DDEBUG={conf.compile.debug_level}")
+
     if not context.no_warning:
         flags.extend((f"-W{w}" for w in conf.compile.warnings))
 
@@ -76,6 +78,8 @@ def generate_flags(conf: Config, context: Context) -> list[str]:
         flags.append("-c")
 
     if context.kind is Kind.OBJ:
+        # TODO: This might not always be the case for
+        # all object files.
         flags.append("-fPIC")
 
     if context.is_shared:
@@ -87,6 +91,7 @@ def generate_flags(conf: Config, context: Context) -> list[str]:
     if not context.no_compile:
         flags.extend((f"-L{l.resolve()}" for l in conf.compile.libraries))
         flags.extend((f"-l{l}" for l in context.libraries))
+
     flags.extend((str(p.resolve()) for p in context.target))
 
     return flags
@@ -98,7 +103,7 @@ def generate_executable(conf: Config, context: Context) -> str:
     return " ".join(generate_flags(conf, context))
 
 
-def generate_from_build(conf: Config, build: Config.Build) -> tuple[tuple[int, Path, str], ...]:
+def generate_from_build(conf: Config, build: Config.Build) -> tuple[tuple[float, Path, str], ...]:
     """
     Generates an entire compile sequence for a build
     configuration.
@@ -113,7 +118,7 @@ def generate_from_build(conf: Config, build: Config.Build) -> tuple[tuple[int, P
     # The 'order', determines the order of priority in
     # which a command most likely needs to be executed.
     order    = 1
-    sequence = []
+    sequence = [] #type: ignore[var-annotated]
 
     # Some of the libraries a build can be dependant on may
     # exist within our project and/or still need to be
@@ -129,7 +134,7 @@ def generate_from_build(conf: Config, build: Config.Build) -> tuple[tuple[int, P
     # Group sources according to shared names.
     # i.e., if file 'a.h' and 'a.c', then group
     # as "a": (a.h, a.c).
-    sources = {}
+    sources = {} #type: ignore[var-annotated]
     for file in build.sources:
         tname = file.name.split(".")[0]
         sources[tname] = (file, *sources.get(tname, ()))
@@ -163,24 +168,16 @@ def generate_from_build(conf: Config, build: Config.Build) -> tuple[tuple[int, P
     sequence.append((0.1*order, ctx.output, generate_from_kind(conf, ctx)))
     # Sort the command sequence to prepare for resolving
     # duplicates.
-    sequence.sort(key=lambda s: s[1] and s[0])
+    sequence.sort(key=lambda s: s[0])
 
-    final_sequence = [sequence.pop(0)]
+    final_sequence = []
+    final_paths    = set()
     while len(sequence):
-        s1 = sequence.pop(0)
-        s2 = final_sequence.pop(0)
-        # If s1 and s2 point to the same file, we remove
-        # the entry with the higher 'order'.
-        if s2[1] == s1[1] and s2[0] < s1[0]:
-            final_sequence.append(s2)
-        elif s2[1] == s1[1] and s2[0] > s1[0]:
-            final_sequence.append(s1)
-        # If s1 and s2 do not point to the same file, we
-        # push them back onto final_sequence.
-        else:
-            final_sequence.extend([s2, s1])
-    # Sort again to ensure order of execution is preserved.
-    final_sequence.sort(key=lambda s: s[1] and s[0])
+        stmt = sequence.pop(0)
+        if stmt[1] in final_paths:
+            continue
+        final_paths.add(stmt[1])
+        final_sequence.append(stmt)
 
     return tuple(final_sequence)
 
@@ -195,7 +192,7 @@ def generate_from_kind(conf: Config, context: Context) -> str:
     # entire project.
     if context.kind is Kind.BIN:
         buf = ""
-        for _, _, cmd in generate_from_build(conf, conf.bin): #type: ignore[argument]
+        for _, _, cmd in generate_from_build(conf, conf.bin): #type: ignore[arg-type]
             buf += os.linesep + f"echo '{cmd}'"
             buf += os.linesep + cmd
         return buf

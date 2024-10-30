@@ -73,6 +73,10 @@ class Config(dict):
             return self.get("compiler", "gcc")
 
         @property
+        def debug_level(self) -> int:
+            return int(self.get("debug_level", "0"))
+
+        @property
         def includes(self) -> list[Path]:
             return list(map(Path, self.get("includes", [])))
 
