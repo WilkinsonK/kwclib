@@ -1,6 +1,6 @@
-#include "monad.h"
+#include "kwsys.h"
 
 int main(void) {
-    Monad m;
+    ErrorF("Hello, %s!\n", "World");
     return 0;
 }
