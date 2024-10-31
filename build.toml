@@ -18,6 +18,6 @@ libraries = ["kwsys"]
 
 [[lib]]
 name = "kwsys"
-sources = ["src/kwsys.c"]
+sources = ["src/colors.c", "src/kwsys.c"]
 kind = "shared"
 output = "libkwsys.so"
