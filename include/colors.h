@@ -28,5 +28,5 @@ typedef enum ANSIEscapeCode {
  * terminal output to be stylized, making it more visually
  * appealing and easier to read.
  */
-const char* code2str(ANSIEscapeCode code, FILE* fd);
+const char* code2str(ANSIEscapeCode, FILE*);
 #endif

@@ -3,14 +3,6 @@
 #include "kwsys.h"
 
 /**
- * Tracks an allocated block of memory.
- */
-typedef struct SystemBlock {
-    void*  ptr;
-    size_t heap_size;
-} SystemBlock;
-
-/**
  * Destroys an allocated block of memory.
  */
 void SystemBlock_Free(SystemBlock* blk) {
@@ -46,19 +38,6 @@ SystemBlock* SystemBlock_Realloc(SystemBlock* blk, size_t size) {
     return blk;
 }
 
-/**
- * Tracks a series of blocks of memory allocated on the
- * heap.
- * Values are tracked to ensure that all blocks allocated
- * are freed.
- */
-typedef struct SystemBlocks {
-    size_t        capacity;
-    size_t        count;
-    size_t        count_allocs;
-    size_t        count_frees;
-    SystemBlock** items;
-} SystemBlocks;
 /** Global heap management system. */
 static SystemBlocks BLOCKS = {0};
 
@@ -66,10 +45,10 @@ static SystemBlocks BLOCKS = {0};
  * Tries to find the index of a block of memory from the
  * associated pointer.
  */
-size_t Blocks_IndexByPointer(void* ptr) {
+size_t SystemBlocks_IndexByPointer(SystemBlocks* sb, void* ptr) {
     size_t idx = 0;
-    while (idx < BLOCKS.count)
-        if (BLOCKS.items[idx++]->ptr == ptr) return idx-1;
+    while (idx < sb->count)
+        if (sb->items[idx++]->ptr == ptr) return idx-1;
     ErrorF("Pointer (%p) could not be found in heap manager\n", ptr);
     return -1;
 }
@@ -78,49 +57,58 @@ size_t Blocks_IndexByPointer(void* ptr) {
  * Tries to free a block of memory located at the index of
  * the system blocks in the heap management system.
  */
-void Blocks_FreeAt(size_t idx) {
-    SystemBlock_Free(BLOCKS.items[idx]);
+void SystemBlocks_FreeAt(SystemBlocks* sb, size_t idx) {
+    SystemBlock_Free(sb->items[idx]);
 
-    BLOCKS.items[idx] = NULL;
-    for (size_t i = idx; (i+1) < BLOCKS.count; i++) {
-        BLOCKS.items[i]   = BLOCKS.items[i+1];
-        BLOCKS.items[i+1] = NULL;
+    sb->items[idx] = NULL;
+    for (size_t i = idx; (i+1) < sb->count; i++) {
+        sb->items[i]   = sb->items[i+1];
+        sb->items[i+1] = NULL;
     }
-    BLOCKS.count_frees++;
-    BLOCKS.count--;
+    sb->count_frees++;
+    sb->count--;
 }
 
-void Blocks_Free(void* ptr) {
-    Blocks_FreeAt(Blocks_IndexByPointer(ptr));
+void SystemBlocks_Free(SystemBlocks* sb, void* ptr) {
+    SystemBlocks_FreeAt(sb, SystemBlocks_IndexByPointer(sb, ptr));
 }
 
-void* Blocks_MAlloc(size_t size) {
+void* SystemBlocks_MAlloc(SystemBlocks* sb, size_t size) {
     SystemBlock* blk = SystemBlock_MAlloc(size);
-    if (BLOCKS.count+1 == BLOCKS.capacity) {
-        BLOCKS.capacity *= 2;
-        BLOCKS.items = (SystemBlock**)realloc(BLOCKS.items, sizeof(SystemBlock*)*BLOCKS.capacity);
+    if (sb->count+1 == sb->capacity) {
+        sb->capacity *= 2;
+        sb->items = (SystemBlock**)realloc(sb->items, sizeof(SystemBlock*)*sb->capacity);
     }
-    BLOCKS.count_allocs++;
-    BLOCKS.items[BLOCKS.count++] = blk;
+    sb->count_allocs++;
+    sb->items[sb->count++] = blk;
     return blk->ptr;
 }
 
-void* Blocks_Realloc(void* ptr, size_t size) {
-    size_t idx = Blocks_IndexByPointer(ptr);
+void* SystemBlocks_Realloc(SystemBlocks* sb, void* ptr, size_t size) {
+    size_t idx = SystemBlocks_IndexByPointer(sb, ptr);
     if (idx == (size_t)-1) return NULL;
-    return SystemBlock_Realloc(BLOCKS.items[idx], size)->ptr;
+    return SystemBlock_Realloc(sb->items[idx], size)->ptr;
 }
 
-void Blocks_Clear(void) {
+void SystemBlocks_Init(SystemBlocks* sb) {
+    sb->capacity     = 1;
+    sb->count        = 0;
+    sb->count_allocs = 0;
+    sb->count_frees  = 0;
+    sb->items        = (SystemBlock**)malloc(sizeof(SystemBlock*));
+    SystemF("Heap managment initialized.\n");
+}
+
+void SystemBlocks_Clear(SystemBlocks* sb) {
     SystemF("Tearing down heap management.\n");
-    while (BLOCKS.items[0] != NULL)
-        Blocks_FreeAt(0);
+    while (sb->items[0] != NULL)
+        SystemBlocks_FreeAt(sb, 0);
 
-    BLOCKS.capacity = 0;
-    BLOCKS.count    = 0;
-    free(BLOCKS.items);
+    sb->capacity = 0;
+    sb->count    = 0;
+    free(sb->items);
 
-    size_t left_over = (BLOCKS.count_allocs - BLOCKS.count_frees);
+    size_t left_over = (sb->count_allocs - sb->count_frees);
     if (left_over != 0) {
         ErrorF("Not all blocks freed. %lu blocks were not freed\n", left_over);
     } else {
@@ -128,11 +116,22 @@ void Blocks_Clear(void) {
     }
 }
 
+void Blocks_Free(void* ptr) {
+    SystemBlocks_Free(&BLOCKS, ptr);
+}
+
+void* Blocks_MAlloc(size_t size) {
+    return SystemBlocks_MAlloc(&BLOCKS, size);
+}
+
+void* Blocks_Realloc(void* ptr, size_t size) {
+    return SystemBlocks_Realloc(&BLOCKS, ptr, size);
+}
+
+void Blocks_Clear(void) {
+    SystemBlocks_Clear(&BLOCKS);
+}
+
 void Blocks_Setup(void) {
-    BLOCKS.capacity     = 1;
-    BLOCKS.count        = 0;
-    BLOCKS.count_allocs = 0;
-    BLOCKS.count_frees  = 0;
-    BLOCKS.items        = (SystemBlock**)malloc(sizeof(SystemBlock*));
-    SystemF("Heap managment initialized.\n")
+    SystemBlocks_Init(&BLOCKS);
 }
