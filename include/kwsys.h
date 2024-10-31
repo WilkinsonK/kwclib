@@ -14,9 +14,15 @@
 // used throughout the KWC system.
 // -------------------------------------------------------
 /** Initializes system assets for KWC lib runtime. */
-#define Kwc_Setup() { Blocks_Setup(); }
+#define Kwc_Setup() { \
+    Blocks_Setup(); \
+    InfoF("KWC system initialized.\n"); \
+}
 /** Destroys system assets for KWC lib runtime. */
-#define Kwc_Clear() { Blocks_Clear(); }
+#define Kwc_Clear() { \
+    Blocks_Clear(); \
+    InfoF("KWC system shut down.\n"); \
+}
 
 // -------------------------------------------------------
 // IO Operations
