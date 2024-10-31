@@ -1,12 +1,13 @@
+#include <stdio.h>
+
 #include "colors.h"
 
 #define ANSI_Escape(C) "\033[" C "m"
 
 const char* code2str(ANSIEscapeCode code, FILE* fd) {
-    int fd_id = *((int*)fd);
     // If the output file is not a TTY, we avoid returning
     // any ANSI escape codes.
-    if (!isatty(fd_id)) return "";
+    if (!isatty(fileno(fd))) return "";
     switch (code) {
         case ANSI_RESET:   return ANSI_Escape( "0");
         case ANSI_BLACK:   return ANSI_Escape("30");
