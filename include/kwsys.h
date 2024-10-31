@@ -7,8 +7,6 @@
 #ifndef KWC_SYSTEM_H
 #define KWC_SYSTEM_H
 #include <stdio.h>
-#include <string.h>
-
 // -------------------------------------------------------
 // General API.
 // -------------------------------------------------------
@@ -114,48 +112,8 @@
 // recommended to use the macros supplied in this section
 // as opposed to the function implementations.
 // -------------------------------------------------------
-
+#include "blocks.h"
 #define Free(PTR) Blocks_Free((void*)PTR); DebugF("Destroyed object\n")
 #define MAlloc(SIZE) Blocks_MAlloc(SIZE); DebugF("Created new object\n")
 #define Realloc(PTR, SIZE) Blocks_Realloc((void*)PTR, SIZE); DebugF("Resized object\n")
-/**
- * Tracks an allocated block of memory.
- */
-typedef struct SystemBlock {
-    void*  ptr;
-    size_t heap_size;
-} SystemBlock;
-/**
- * Tracks a series of blocks of memory allocated on the
- * heap.
- * Values are tracked to ensure that all blocks allocated
- * are freed.
- */
-typedef struct SystemBlocks {
-    size_t        capacity;
-    size_t        count;
-    size_t        count_allocs;
-    size_t        count_frees;
-    SystemBlock** items;
-} SystemBlocks;
-/** Deallocates all blocks allocated in this system */
-void SystemBlocks_Clear(SystemBlocks*);
-/** Destroys all heap blocks. */
-void SystemBlocks_Free(SystemBlocks*, void*);
-/** Initializes a heap management system. */
-void SystemBlocks_Init(SystemBlocks*);
-/** Initializes a block of memory on the heap. */
-void* SystemBlocks_MAlloc(SystemBlocks*, size_t);
-/** Resizes a block of memory on the heap. */
-void* SystemBlocks_Realloc(SystemBlocks*, void*, size_t);
-/** Destroys all blocks allocated on the heap. */
-void Blocks_Clear(void);
-/** Initializes the heap block management system. */
-void Blocks_Setup(void);
-/** Free and destroy a single heap allocation. */
-void Blocks_Free(void*);
-/** Initializes a block of memory on the heap. */
-void* Blocks_MAlloc(size_t);
-/** Resizes a block of memory on the heap. */
-void* Blocks_Realloc(void*, size_t);
 #endif // Pragma

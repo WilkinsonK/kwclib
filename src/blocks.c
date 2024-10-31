@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "blocks.h"
 #include "kwsys.h"
 
 /**
@@ -90,7 +91,7 @@ void* SystemBlocks_Realloc(SystemBlocks* sb, void* ptr, size_t size) {
     return SystemBlock_Realloc(sb->items[idx], size)->ptr;
 }
 
-void SystemBlocks_Init(SystemBlocks* sb) {
+void SystemBlocks_Setup(SystemBlocks* sb) {
     sb->capacity     = 1;
     sb->count        = 0;
     sb->count_allocs = 0;
@@ -133,5 +134,5 @@ void Blocks_Clear(void) {
 }
 
 void Blocks_Setup(void) {
-    SystemBlocks_Init(&BLOCKS);
+    SystemBlocks_Setup(&BLOCKS);
 }

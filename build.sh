@@ -13,12 +13,12 @@ build() {
     [[ ! -d target/lib ]] && mkdir -p target/lib
     [[ ! -d target/obj ]] && mkdir -p target/obj
 
+    echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/obj/blocks.o'
+    gcc -DDEBUG=0 -Wall -Wextra -Wpedantic -I/Users/kwilkinson/dev/lib/kwclib/include -std=c11 -c -fPIC -o /Users/kwilkinson/dev/lib/kwclib/target/obj/blocks.o /Users/kwilkinson/dev/lib/kwclib/src/blocks.c
     echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/obj/colors.o'
     gcc -DDEBUG=0 -Wall -Wextra -Wpedantic -I/Users/kwilkinson/dev/lib/kwclib/include -std=c11 -c -fPIC -o /Users/kwilkinson/dev/lib/kwclib/target/obj/colors.o /Users/kwilkinson/dev/lib/kwclib/src/colors.c
-    echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/obj/kwsys.o'
-    gcc -DDEBUG=0 -Wall -Wextra -Wpedantic -I/Users/kwilkinson/dev/lib/kwclib/include -std=c11 -c -fPIC -o /Users/kwilkinson/dev/lib/kwclib/target/obj/kwsys.o /Users/kwilkinson/dev/lib/kwclib/src/kwsys.c
     echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/lib/libkwsys.so'
-    gcc -DDEBUG=0 -std=c11 -shared -o /Users/kwilkinson/dev/lib/kwclib/target/lib/libkwsys.so -L/Users/kwilkinson/dev/lib/kwclib/target/lib /Users/kwilkinson/dev/lib/kwclib/target/obj/colors.o /Users/kwilkinson/dev/lib/kwclib/target/obj/kwsys.o
+    gcc -DDEBUG=0 -std=c11 -shared -o /Users/kwilkinson/dev/lib/kwclib/target/lib/libkwsys.so -L/Users/kwilkinson/dev/lib/kwclib/target/lib /Users/kwilkinson/dev/lib/kwclib/target/obj/blocks.o /Users/kwilkinson/dev/lib/kwclib/target/obj/colors.o
     echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/obj/main.o'
     gcc -DDEBUG=0 -Wall -Wextra -Wpedantic -I/Users/kwilkinson/dev/lib/kwclib/include -std=c11 -c -fPIC -o /Users/kwilkinson/dev/lib/kwclib/target/obj/main.o /Users/kwilkinson/dev/lib/kwclib/src/main.c
     echo '\033[34mbuilding\033[0m /Users/kwilkinson/dev/lib/kwclib/target/main'
